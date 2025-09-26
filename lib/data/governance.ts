@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 export type GovernanceTask = {
   id: string;
@@ -8,9 +8,10 @@ export type GovernanceTask = {
   status: string;
 };
 
-export async function fetchGovernanceTasks(workspaceId: string): Promise<GovernanceTask[]> {
-  const client = createServiceRoleClient();
-
+export async function fetchGovernanceTasks(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<GovernanceTask[]> {
   const [{ data: approvals }, { data: jobs }] = await Promise.all([
     client
       .from("approvals")

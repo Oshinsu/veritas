@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import {
-  appendEvent,
-  persistCopilotEvent,
-  type CopilotSession
-} from "@/lib/ai/copilot";
+import { appendEvent, persistCopilotEvent, type CopilotSession } from "@/lib/ai/copilot";
 import { invokeCopilotAgent } from "@/lib/ai/openai-agent";
+import { requireWorkspaceContextFromRequest, UnauthorizedError } from "@/lib/server/context";
 
 const messageSchema = z.object({
   role: z.enum(["user", "assistant", "system", "tool"]),
@@ -41,11 +38,21 @@ function parseSession(payload: z.infer<typeof sessionSchema>): CopilotSession {
 
 export async function POST(request: Request) {
   try {
+    const { supabase, workspaceId: contextWorkspaceId } = await requireWorkspaceContextFromRequest(request);
     const json = await request.json();
     const parsed = requestSchema.parse(json);
     const session = parseSession(parsed.session);
 
-    const withUserEvent = appendEvent(session, {
+    if (session.workspaceId && session.workspaceId !== contextWorkspaceId) {
+      throw new UnauthorizedError("Session Copilot hors du workspace autorisé");
+    }
+
+    const resolvedSession: CopilotSession = {
+      ...session,
+      workspaceId: session.workspaceId ?? contextWorkspaceId
+    };
+
+    const withUserEvent = appendEvent(resolvedSession, {
       role: "user",
       content: parsed.prompt
     });
@@ -60,7 +67,8 @@ export async function POST(request: Request) {
         role: event.role,
         content: event.content
       })),
-      session.workspaceId
+      resolvedSession.workspaceId,
+      supabase
     );
 
     const assistantEvent = {
@@ -89,6 +97,9 @@ export async function POST(request: Request) {
         { error: "Requête invalide", details: error.flatten() },
         { status: 422 }
       );
+    }
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
     }
     return NextResponse.json(
       { error: "Impossible de traiter la requête Copilot" },

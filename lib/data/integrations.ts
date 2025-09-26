@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { type SupabaseClient } from "@supabase/supabase-js";
 import { computeTransportLabel, resolveMcpEntry } from "@/lib/mcp/registry";
 
 export type McpIntegrationStatus = "online" | "degraded" | "offline" | "unknown";
@@ -23,8 +23,10 @@ export const integrationStatusTone: Record<McpIntegrationStatus, string> = {
   unknown: "border-slate-500/40 bg-slate-500/10 text-slate-200"
 };
 
-export async function fetchMcpIntegrations(workspaceId: string): Promise<McpIntegration[]> {
-  const client = createServiceRoleClient();
+export async function fetchMcpIntegrations(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<McpIntegration[]> {
   const { data, error } = await client
     .from("mcp_connections")
     .select("id,provider,status,server_url,last_health_check")

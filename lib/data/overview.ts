@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 export type KpiSummary = {
   label: string;
@@ -28,9 +28,7 @@ export type ActiveAlert = {
   triggeredAt: string;
 };
 
-export async function fetchKpiSummary(workspaceId: string): Promise<KpiSummary[]> {
-  const client = createServiceRoleClient();
-
+export async function fetchKpiSummary(client: SupabaseClient, workspaceId: string): Promise<KpiSummary[]> {
   const { data, error } = await client
     .from("v_kpi_summary")
     .select("observed_at,total_spend,total_conversions,total_revenue,avg_roas,avg_cpa")
@@ -83,8 +81,10 @@ export async function fetchKpiSummary(workspaceId: string): Promise<KpiSummary[]
   ];
 }
 
-export async function fetchTerritoryPerformance(workspaceId: string): Promise<TerritoryPerformance[]> {
-  const client = createServiceRoleClient();
+export async function fetchTerritoryPerformance(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<TerritoryPerformance[]> {
   const { data, error } = await client
     .from("v_territory_performance")
     .select("territory,spend,roas")
@@ -104,8 +104,7 @@ export async function fetchTerritoryPerformance(workspaceId: string): Promise<Te
     }));
 }
 
-export async function fetchSyncStatus(workspaceId: string): Promise<SyncStatus[]> {
-  const client = createServiceRoleClient();
+export async function fetchSyncStatus(client: SupabaseClient, workspaceId: string): Promise<SyncStatus[]> {
   const { data, error } = await client
     .from("v_sync_status")
     .select("provider,status,last_finished,next_run")
@@ -124,8 +123,10 @@ export async function fetchSyncStatus(workspaceId: string): Promise<SyncStatus[]
   }));
 }
 
-export async function fetchActiveAlerts(workspaceId: string): Promise<ActiveAlert[]> {
-  const client = createServiceRoleClient();
+export async function fetchActiveAlerts(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<ActiveAlert[]> {
   const { data, error } = await client
     .from("v_active_alerts")
     .select("id,name,payload,status,triggered_at")

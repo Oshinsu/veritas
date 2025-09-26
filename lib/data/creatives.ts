@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 export type CreativeAnalysis = {
   fatigueScore: number | null;
@@ -15,8 +15,10 @@ export type CreativeAsset = {
   lastSeenAt?: string | null;
 };
 
-export async function fetchCreativeAssets(workspaceId: string): Promise<CreativeAsset[]> {
-  const client = createServiceRoleClient();
+export async function fetchCreativeAssets(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<CreativeAsset[]> {
   const { data, error } = await client
     .from("creative_assets")
     .select("id,name,platform,status,thumbnail_url,last_seen_at,metrics,creative_analysis(fatigue_score,tags)")

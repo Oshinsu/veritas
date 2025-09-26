@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 export type SyncJob = {
   id: string;
@@ -9,8 +9,10 @@ export type SyncJob = {
   finishedAt?: string | null;
 };
 
-export async function fetchSyncQueue(workspaceId: string): Promise<SyncJob[]> {
-  const client = createServiceRoleClient();
+export async function fetchSyncQueue(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<SyncJob[]> {
   const { data, error } = await client
     .from("sync_jobs")
     .select("id,provider,status,scheduled_for,started_at,finished_at")

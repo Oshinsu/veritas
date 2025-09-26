@@ -1,21 +1,13 @@
-import { headers } from "next/headers";
-
 import { SectionHeader } from "@/components/ui/section-header";
 import { fetchReports, fetchExports } from "@/lib/data/reports";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
+import { requireWorkspaceContext } from "@/lib/server/context";
 import { Download, FileText } from "lucide-react";
 
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
-
 export default async function ReportsPage() {
-  const workspaceId = await loadWorkspaceId();
+  const { supabase, workspaceId } = await requireWorkspaceContext();
   const [reports, exportsHistory] = await Promise.all([
-    fetchReports(workspaceId),
-    fetchExports(workspaceId)
+    fetchReports(supabase, workspaceId),
+    fetchExports(supabase, workspaceId)
   ]);
 
   return (

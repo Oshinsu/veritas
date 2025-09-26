@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { type SupabaseClient } from "@supabase/supabase-js";
 import {
   mcpRegistry,
   resolveMcpEntry,
@@ -49,10 +49,9 @@ type CredentialRow = {
 };
 
 export async function fetchCredentialSummaries(
+  client: SupabaseClient,
   workspaceId: string
 ): Promise<CredentialSummary[]> {
-  const client = createServiceRoleClient();
-
   const { data, error } = await client
     .from("credentials")
     .select("id,provider,expires_at,created_at")

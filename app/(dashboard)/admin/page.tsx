@@ -1,5 +1,4 @@
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { z } from "zod";
 
 import { SectionHeader } from "@/components/ui/section-header";
@@ -10,9 +9,12 @@ import { StatusPill } from "@/components/integrations/status-pill";
 import { fetchCredentialSummaries, type CredentialSummary } from "@/lib/data/credentials";
 import { fetchMcpIntegrations, type McpIntegration } from "@/lib/data/integrations";
 import { fetchSyncQueue, type SyncJob } from "@/lib/data/sync";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
 import { mcpRegistry, resolveMcpEntry } from "@/lib/mcp/registry";
+import {
+  requireWorkspaceContext,
+  runWithServiceRoleForWorkspace,
+  UnauthorizedError
+} from "@/lib/server/context";
 
 const backendChecks = [
   {
@@ -61,17 +63,12 @@ const credentialStatusTone: Record<CredentialSummary["status"], string> = {
   missing: "border-slate-500/40 bg-slate-500/10 text-slate-200"
 };
 
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
-
 export default async function AdminPage() {
-  const workspaceId = await loadWorkspaceId();
+  const { supabase, workspaceId } = await requireWorkspaceContext();
   const [credentials, integrations, syncQueue] = await Promise.all([
-    fetchCredentialSummaries(workspaceId),
-    fetchMcpIntegrations(workspaceId),
-    fetchSyncQueue(workspaceId)
+    fetchCredentialSummaries(supabase, workspaceId),
+    fetchMcpIntegrations(supabase, workspaceId),
+    fetchSyncQueue(supabase, workspaceId)
   ]);
 
   async function queueSync(formData: FormData) {
@@ -90,13 +87,23 @@ export default async function AdminPage() {
       throw new Error(`Connecteur MCP inconnu: ${provider}`);
     }
 
-    const supabase = createServiceRoleClient();
-    const workspaceFromRequest = await resolveWorkspaceId(headers(), supabase);
+    const { supabase: rlsClient, workspaceId, userId } = await requireWorkspaceContext();
 
-    const { data: connection } = await supabase
+    const { data: membership } = await rlsClient
+      .from("memberships")
+      .select("role")
+      .eq("workspace_id", workspaceId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (membership?.role !== "admin") {
+      throw new UnauthorizedError("Seuls les administrateurs peuvent lancer une synchronisation");
+    }
+
+    const { data: connection } = await rlsClient
       .from("mcp_connections")
       .select("id")
-      .eq("workspace_id", workspaceFromRequest)
+      .eq("workspace_id", workspaceId)
       .eq("provider", provider)
       .maybeSingle();
 
@@ -104,17 +111,19 @@ export default async function AdminPage() {
       throw new Error("Aucun connecteur enregistré pour ce workspace");
     }
 
-    const { error } = await supabase.from("sync_jobs").insert({
-      workspace_id: workspaceFromRequest,
-      provider,
-      status: "queued",
-      scheduled_for: new Date().toISOString(),
-      payload: { trigger: "admin-ui" }
-    });
+    await runWithServiceRoleForWorkspace(workspaceId, async (serviceClient) => {
+      const { error } = await serviceClient.from("sync_jobs").insert({
+        workspace_id: workspaceId,
+        provider,
+        status: "queued",
+        scheduled_for: new Date().toISOString(),
+        payload: { trigger: "admin-ui" }
+      });
 
-    if (error) {
-      throw error;
-    }
+      if (error) {
+        throw error;
+      }
+    });
 
     revalidatePath("/overview");
     revalidatePath("/admin");

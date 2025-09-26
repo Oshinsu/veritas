@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 export type TerritorySnapshot = {
   territory: string;
@@ -7,8 +7,10 @@ export type TerritorySnapshot = {
   lastObservedAt?: string | null;
 };
 
-export async function fetchTerritorySnapshots(workspaceId: string): Promise<TerritorySnapshot[]> {
-  const client = createServiceRoleClient();
+export async function fetchTerritorySnapshots(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<TerritorySnapshot[]> {
   const { data, error } = await client
     .from("v_territory_performance")
     .select("territory,spend,roas")

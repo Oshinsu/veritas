@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 export type PerformanceRow = {
   observedAt: string;
@@ -15,10 +15,10 @@ export type PerformanceRow = {
 };
 
 export async function fetchPerformanceRows(
+  client: SupabaseClient,
   workspaceId: string,
   params: { territory?: string; platform?: string; startDate?: string; endDate?: string }
 ): Promise<PerformanceRow[]> {
-  const client = createServiceRoleClient();
   let query = client
     .from("v_kpi_daily")
     .select("observed_at,platform,territory,spend,impressions,clicks,conversions,revenue,cpa,roas")

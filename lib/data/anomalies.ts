@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 export type AnomalyDimension = {
   type?: string;
@@ -16,8 +16,10 @@ export type Anomaly = {
   description?: string | null;
 };
 
-export async function fetchAnomalies(workspaceId: string): Promise<Anomaly[]> {
-  const client = createServiceRoleClient();
+export async function fetchAnomalies(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<Anomaly[]> {
   const { data, error } = await client
     .from("anomaly_events")
     .select("id,detected_at,severity,status,dimension,runbook_id,description")

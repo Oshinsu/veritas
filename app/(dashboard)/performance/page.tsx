@@ -1,11 +1,8 @@
-import { headers } from "next/headers";
-
 import { SectionHeader } from "@/components/ui/section-header";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { Pill } from "@/components/ui/pill";
 import { fetchPerformanceRows, type PerformanceRow } from "@/lib/data/performance";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
+import { requireWorkspaceContext } from "@/lib/server/context";
 
 const columns: Column<PerformanceRow>[] = [
   { header: "Canal", accessor: (row) => row.platform },
@@ -27,14 +24,9 @@ const columns: Column<PerformanceRow>[] = [
   }
 ];
 
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
-
 export default async function PerformancePage() {
-  const workspaceId = await loadWorkspaceId();
-  const data = await fetchPerformanceRows(workspaceId, {});
+  const { supabase, workspaceId } = await requireWorkspaceContext();
+  const data = await fetchPerformanceRows(supabase, workspaceId, {});
 
   return (
     <div className="space-y-10">

@@ -1,10 +1,7 @@
-import { headers } from "next/headers";
-
 import { SectionHeader } from "@/components/ui/section-header";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { fetchAnomalies, type Anomaly } from "@/lib/data/anomalies";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
+import { requireWorkspaceContext } from "@/lib/server/context";
 
 const columns: Column<Anomaly>[] = [
   { header: "Type", accessor: (row) => row.dimension.type ?? "Anomalie" },
@@ -18,14 +15,9 @@ const columns: Column<Anomaly>[] = [
   { header: "Runbook", accessor: (row) => row.description ?? "—" }
 ];
 
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
-
 export default async function AnomaliesPage() {
-  const workspaceId = await loadWorkspaceId();
-  const anomalies = await fetchAnomalies(workspaceId);
+  const { supabase, workspaceId } = await requireWorkspaceContext();
+  const anomalies = await fetchAnomalies(supabase, workspaceId);
 
   return (
     <div className="space-y-10">

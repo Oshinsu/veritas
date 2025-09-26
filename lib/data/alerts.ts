@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 export type AlertRule = {
   id: string;
@@ -20,8 +20,10 @@ export type AlertEvent = {
   payload: AlertEventPayload;
 };
 
-export async function fetchAlertRules(workspaceId: string): Promise<AlertRule[]> {
-  const client = createServiceRoleClient();
+export async function fetchAlertRules(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<AlertRule[]> {
   const { data, error } = await client
     .from("alert_rules")
     .select("id,name,channel,threshold")
@@ -40,8 +42,10 @@ export async function fetchAlertRules(workspaceId: string): Promise<AlertRule[]>
   }));
 }
 
-export async function fetchAlertEvents(workspaceId: string): Promise<AlertEvent[]> {
-  const client = createServiceRoleClient();
+export async function fetchAlertEvents(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<AlertEvent[]> {
   const { data, error } = await client
     .from("alert_events")
     .select("id,rule_id,status,payload,triggered_at,alert_rules(workspace_id)")
