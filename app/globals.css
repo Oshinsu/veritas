@@ -24,6 +24,7 @@ a:hover {
 
 .gradient-border {
   position: relative;
+  z-index: 0;
 }
 
 .gradient-border::before {
@@ -37,4 +38,5 @@ a:hover {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+  z-index: -1; /* ✅ ligne conservée */
 }
