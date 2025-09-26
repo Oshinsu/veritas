@@ -2,7 +2,6 @@ import { MetricCard } from "@/components/cards/metric-card";
 import { TerritoryChart } from "@/components/charts/territory-chart";
 import { SectionHeader } from "@/components/ui/section-header";
 import { Pill } from "@/components/ui/pill";
-import { headers } from "next/headers";
 
 import {
   fetchActiveAlerts,
@@ -11,24 +10,18 @@ import {
   fetchTerritoryPerformance
 } from "@/lib/data/overview";
 import { fetchMcpIntegrations, integrationStatusTone } from "@/lib/data/integrations";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
+import { requireWorkspaceContext } from "@/lib/server/context";
 import { AlertTriangle, Download } from "lucide-react";
 
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
-
 export default async function OverviewPage() {
-  const workspaceId = await loadWorkspaceId();
+  const { supabase, workspaceId } = await requireWorkspaceContext();
 
   const [kpiSummary, territoryBreakdown, syncStatus, activeAlerts, integrations] = await Promise.all([
-    fetchKpiSummary(workspaceId),
-    fetchTerritoryPerformance(workspaceId),
-    fetchSyncStatus(workspaceId),
-    fetchActiveAlerts(workspaceId),
-    fetchMcpIntegrations(workspaceId)
+    fetchKpiSummary(supabase, workspaceId),
+    fetchTerritoryPerformance(supabase, workspaceId),
+    fetchSyncStatus(supabase, workspaceId),
+    fetchActiveAlerts(supabase, workspaceId),
+    fetchMcpIntegrations(supabase, workspaceId)
   ]);
 
   return (

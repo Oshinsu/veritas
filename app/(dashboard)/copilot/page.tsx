@@ -1,17 +1,9 @@
-import { headers } from "next/headers";
-
 import { CopilotWorkspace } from "@/components/copilot/workspace";
 import { fetchCopilotSuggestions } from "@/lib/data/copilot";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
-
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
+import { requireWorkspaceContext } from "@/lib/server/context";
 
 export default async function CopilotPage() {
-  const workspaceId = await loadWorkspaceId();
-  const suggestions = await fetchCopilotSuggestions(workspaceId);
+  const { supabase, workspaceId } = await requireWorkspaceContext();
+  const suggestions = await fetchCopilotSuggestions(supabase, workspaceId);
   return <CopilotWorkspace suggestions={suggestions} />;
 }

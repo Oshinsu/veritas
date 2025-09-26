@@ -1,19 +1,11 @@
-import { headers } from "next/headers";
-
 import { SectionHeader } from "@/components/ui/section-header";
 import { Pill } from "@/components/ui/pill";
 import { fetchLiftTests } from "@/lib/data/attribution";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
-
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
+import { requireWorkspaceContext } from "@/lib/server/context";
 
 export default async function AttributionPage() {
-  const workspaceId = await loadWorkspaceId();
-  const tests = await fetchLiftTests(workspaceId);
+  const { supabase, workspaceId } = await requireWorkspaceContext();
+  const tests = await fetchLiftTests(supabase, workspaceId);
 
   return (
     <div className="space-y-10">

@@ -1,19 +1,11 @@
-import { headers } from "next/headers";
-
 import { SectionHeader } from "@/components/ui/section-header";
 import { Pill } from "@/components/ui/pill";
 import { fetchCreativeAssets } from "@/lib/data/creatives";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
-
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
+import { requireWorkspaceContext } from "@/lib/server/context";
 
 export default async function CreativesPage() {
-  const workspaceId = await loadWorkspaceId();
-  const assets = await fetchCreativeAssets(workspaceId);
+  const { supabase, workspaceId } = await requireWorkspaceContext();
+  const assets = await fetchCreativeAssets(supabase, workspaceId);
 
   return (
     <div className="space-y-10">

@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 export type Opportunity = {
   id: string;
@@ -12,8 +12,10 @@ export type Opportunity = {
   ownerName?: string | null;
 };
 
-export async function fetchOpportunities(workspaceId: string): Promise<Opportunity[]> {
-  const client = createServiceRoleClient();
+export async function fetchOpportunities(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<Opportunity[]> {
   const { data, error } = await client
     .from("opportunities")
     .select("id,title,summary,score,status,territory,eta,owner,users(full_name,email)")

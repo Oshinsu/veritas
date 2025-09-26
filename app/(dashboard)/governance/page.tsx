@@ -1,11 +1,8 @@
-import { headers } from "next/headers";
-
 import { SectionHeader } from "@/components/ui/section-header";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { Pill } from "@/components/ui/pill";
 import { fetchGovernanceTasks, type GovernanceTask } from "@/lib/data/governance";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
+import { requireWorkspaceContext } from "@/lib/server/context";
 
 const columns: Column<GovernanceTask>[] = [
   { header: "Tâche", accessor: (row) => row.title },
@@ -14,14 +11,9 @@ const columns: Column<GovernanceTask>[] = [
   { header: "Statut", accessor: (row) => <Pill>{row.status}</Pill> }
 ];
 
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
-
 export default async function GovernancePage() {
-  const workspaceId = await loadWorkspaceId();
-  const tasks = await fetchGovernanceTasks(workspaceId);
+  const { supabase, workspaceId } = await requireWorkspaceContext();
+  const tasks = await fetchGovernanceTasks(supabase, workspaceId);
 
   return (
     <div className="space-y-10">

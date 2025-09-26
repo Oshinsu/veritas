@@ -1,13 +1,6 @@
-import { headers } from "next/headers";
-
 import { SectionHeader } from "@/components/ui/section-header";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
-
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
+import { requireWorkspaceContext } from "@/lib/server/context";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 type MembershipProfile = {
   role: string | null;
@@ -18,8 +11,10 @@ type MembershipProfile = {
   };
 };
 
-async function fetchProfile(workspaceId: string): Promise<MembershipProfile | null> {
-  const supabase = createServiceRoleClient();
+async function fetchProfile(
+  supabase: SupabaseClient,
+  workspaceId: string
+): Promise<MembershipProfile | null> {
   const { data: membership } = await supabase
     .from("memberships")
     .select("user_id,role,territories,users(full_name,email)")
@@ -53,8 +48,8 @@ async function fetchProfile(workspaceId: string): Promise<MembershipProfile | nu
 }
 
 export default async function ProfilePage() {
-  const workspaceId = await loadWorkspaceId();
-  const membership = await fetchProfile(workspaceId);
+  const { supabase, workspaceId } = await requireWorkspaceContext();
+  const membership = await fetchProfile(supabase, workspaceId);
 
   const preferences = [
     {

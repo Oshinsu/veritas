@@ -1,11 +1,8 @@
-import { headers } from "next/headers";
-
 import { SectionHeader } from "@/components/ui/section-header";
 import { Pill } from "@/components/ui/pill";
 import { fetchActiveAlerts } from "@/lib/data/overview";
 import { fetchTerritorySnapshots } from "@/lib/data/territories";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
+import { requireWorkspaceContext } from "@/lib/server/context";
 import { AlertTriangle } from "lucide-react";
 
 const healthTone: Record<string, string> = {
@@ -22,16 +19,11 @@ function computeHealth(lastObservedAt?: string | null) {
   return hours > 36 ? ("Warning" as const) : ("OK" as const);
 }
 
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
-
 export default async function TerritoriesPage() {
-  const workspaceId = await loadWorkspaceId();
+  const { supabase, workspaceId } = await requireWorkspaceContext();
   const [territories, alerts] = await Promise.all([
-    fetchTerritorySnapshots(workspaceId),
-    fetchActiveAlerts(workspaceId)
+    fetchTerritorySnapshots(supabase, workspaceId),
+    fetchActiveAlerts(supabase, workspaceId)
   ]);
 
   return (

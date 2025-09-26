@@ -12,14 +12,14 @@ type AgentRunResponse = {
   status?: string;
 };
 
-async function fetchMcpToolResources(workspaceId?: string) {
-  if (!workspaceId) {
+import { type SupabaseClient } from "@supabase/supabase-js";
+
+async function fetchMcpToolResources(supabase: SupabaseClient | undefined, workspaceId?: string) {
+  if (!workspaceId || !supabase) {
     return [] as { type: string; server_url: string; name: string }[];
   }
   try {
-    const { createServiceRoleClient } = await import("@/lib/supabase/server");
-    const client = createServiceRoleClient();
-    const { data } = await client
+    const { data } = await supabase
       .from("mcp_connections")
       .select("provider,server_url,status")
       .eq("workspace_id", workspaceId)
@@ -37,13 +37,17 @@ async function fetchMcpToolResources(workspaceId?: string) {
   }
 }
 
-export async function invokeCopilotAgent(messages: AgentMessage[], workspaceId?: string): Promise<string> {
+export async function invokeCopilotAgent(
+  messages: AgentMessage[],
+  workspaceId?: string,
+  supabase?: SupabaseClient
+): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey || !OPENAI_AGENT_ID) {
     return "⚠️ L'agent OpenAI n'est pas configuré. Ajoutez OPENAI_API_KEY et OPENAI_AGENT_ID.";
   }
 
-  const mcpTools = await fetchMcpToolResources(workspaceId);
+  const mcpTools = await fetchMcpToolResources(supabase, workspaceId);
 
   const payload = {
     agent_id: OPENAI_AGENT_ID,

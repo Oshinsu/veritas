@@ -1,19 +1,11 @@
-import { headers } from "next/headers";
-
 import { SectionHeader } from "@/components/ui/section-header";
 import { Pill } from "@/components/ui/pill";
 import { fetchInsights } from "@/lib/data/insights";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
-
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
+import { requireWorkspaceContext } from "@/lib/server/context";
 
 export default async function IntelligencePage() {
-  const workspaceId = await loadWorkspaceId();
-  const insights = await fetchInsights(workspaceId);
+  const { supabase, workspaceId } = await requireWorkspaceContext();
+  const insights = await fetchInsights(supabase, workspaceId);
 
   return (
     <div className="space-y-10">

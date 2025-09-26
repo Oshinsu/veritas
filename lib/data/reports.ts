@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 export type Report = {
   id: string;
@@ -16,8 +16,10 @@ export type ReportExport = {
   reportId: string | null;
 };
 
-export async function fetchReports(workspaceId: string): Promise<Report[]> {
-  const client = createServiceRoleClient();
+export async function fetchReports(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<Report[]> {
   const { data, error } = await client
     .from("reports")
     .select("id,name,cadence,recipients")
@@ -36,8 +38,10 @@ export async function fetchReports(workspaceId: string): Promise<Report[]> {
   }));
 }
 
-export async function fetchExports(workspaceId: string): Promise<ReportExport[]> {
-  const client = createServiceRoleClient();
+export async function fetchExports(
+  client: SupabaseClient,
+  workspaceId: string
+): Promise<ReportExport[]> {
   const { data, error } = await client
     .from("exports")
     .select("id,status,created_at,report_id,reports(workspace_id,name)")

@@ -1,22 +1,14 @@
-import { headers } from "next/headers";
-
 import { SectionHeader } from "@/components/ui/section-header";
 import { Pill } from "@/components/ui/pill";
 import { fetchOpportunities } from "@/lib/data/opportunities";
 import { fetchInsights } from "@/lib/data/insights";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { resolveWorkspaceId } from "@/lib/workspace";
-
-async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
-}
+import { requireWorkspaceContext } from "@/lib/server/context";
 
 export default async function OpportunitiesPage() {
-  const workspaceId = await loadWorkspaceId();
+  const { supabase, workspaceId } = await requireWorkspaceContext();
   const [opportunities, insights] = await Promise.all([
-    fetchOpportunities(workspaceId),
-    fetchInsights(workspaceId)
+    fetchOpportunities(supabase, workspaceId),
+    fetchInsights(supabase, workspaceId)
   ]);
 
   return (
