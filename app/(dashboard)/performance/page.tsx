@@ -1,10 +1,9 @@
 import { headers } from "next/headers";
 
-import { SectionHeader } from "@/components/ui/section-header";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { Pill } from "@/components/ui/pill";
+import { SectionHeader } from "@/components/ui/section-header";
 import { fetchPerformanceRows, type PerformanceRow } from "@/lib/data/performance";
-import { createServiceRoleClient } from "@/lib/supabase/server";
 import { resolveWorkspaceId } from "@/lib/workspace";
 
 const columns: Column<PerformanceRow>[] = [
@@ -28,8 +27,7 @@ const columns: Column<PerformanceRow>[] = [
 ];
 
 async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
+  return resolveWorkspaceId(headers());
 }
 
 export default async function PerformancePage() {

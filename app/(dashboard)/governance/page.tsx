@@ -4,7 +4,6 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { Pill } from "@/components/ui/pill";
 import { fetchGovernanceTasks, type GovernanceTask } from "@/lib/data/governance";
-import { createServiceRoleClient } from "@/lib/supabase/server";
 import { resolveWorkspaceId } from "@/lib/workspace";
 
 const columns: Column<GovernanceTask>[] = [
@@ -15,8 +14,7 @@ const columns: Column<GovernanceTask>[] = [
 ];
 
 async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
+  return resolveWorkspaceId(headers());
 }
 
 export default async function GovernancePage() {

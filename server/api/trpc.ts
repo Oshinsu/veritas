@@ -25,7 +25,7 @@ export const t = initTRPC.context<Context>().create({
 
 export async function createContext({ req }: { req: Request }): Promise<Context> {
   const supabase = createServiceRoleClient();
-  const workspaceId = await resolveWorkspaceId(req, supabase);
+  const workspaceId = await resolveWorkspaceId(req);
 
   const authHeader = req.headers.get("authorization");
   const userId = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : undefined;

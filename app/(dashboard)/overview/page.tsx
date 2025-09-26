@@ -1,9 +1,10 @@
+import { headers } from "next/headers";
+import { AlertTriangle, Download } from "lucide-react";
+
 import { MetricCard } from "@/components/cards/metric-card";
 import { TerritoryChart } from "@/components/charts/territory-chart";
-import { SectionHeader } from "@/components/ui/section-header";
 import { Pill } from "@/components/ui/pill";
-import { headers } from "next/headers";
-
+import { SectionHeader } from "@/components/ui/section-header";
 import {
   fetchActiveAlerts,
   fetchKpiSummary,
@@ -11,13 +12,10 @@ import {
   fetchTerritoryPerformance
 } from "@/lib/data/overview";
 import { fetchMcpIntegrations, integrationStatusTone } from "@/lib/data/integrations";
-import { createServiceRoleClient } from "@/lib/supabase/server";
 import { resolveWorkspaceId } from "@/lib/workspace";
-import { AlertTriangle, Download } from "lucide-react";
 
 async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
+  return resolveWorkspaceId(headers());
 }
 
 export default async function OverviewPage() {
@@ -89,7 +87,10 @@ export default async function OverviewPage() {
               </li>
             )}
             {syncStatus.map((item) => (
-              <li key={`${item.provider}-${item.status}`} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+              <li
+                key={`${item.provider}-${item.status}`}
+                className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+              >
                 <div>
                   <p className="font-medium text-slate-100">{item.provider}</p>
                   <p className="text-xs text-slate-400">
@@ -144,14 +145,19 @@ export default async function OverviewPage() {
               </li>
             )}
             {integrations.map((integration) => (
-              <li key={integration.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+              <li
+                key={integration.id}
+                className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+              >
                 <div>
                   <p className="font-medium text-slate-100">{integration.platform}</p>
                   <p className="text-xs text-slate-400">
                     Transport {integration.transport} · dernière santé {integration.updatedAt ? new Date(integration.updatedAt).toLocaleString("fr-FR") : "—"}
                   </p>
                 </div>
-                <span className={`rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.3em] ${integrationStatusTone[integration.status]}`}>
+                <span
+                  className={`rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.3em] ${integrationStatusTone[integration.status]}`}
+                >
                   {integration.status}
                 </span>
               </li>

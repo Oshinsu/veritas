@@ -62,8 +62,7 @@ const credentialStatusTone: Record<CredentialSummary["status"], string> = {
 };
 
 async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
+  return resolveWorkspaceId(headers());
 }
 
 export default async function AdminPage() {
@@ -91,7 +90,7 @@ export default async function AdminPage() {
     }
 
     const supabase = createServiceRoleClient();
-    const workspaceFromRequest = await resolveWorkspaceId(headers(), supabase);
+    const workspaceFromRequest = await resolveWorkspaceId(headers());
 
     const { data: connection } = await supabase
       .from("mcp_connections")

@@ -1,8 +1,7 @@
-import { randomUUID } from "crypto";
-
 import { type SupabaseClient } from "@supabase/supabase-js";
+import { redirect } from "next/navigation";
 
-import { slugify } from "@/lib/utils";
+import { createRlsClient, type HeaderCarrier as WorkspaceCarrier } from "@/lib/supabase/rls";
 
 const WORKSPACE_COOKIE = "orionpulse_workspace";
 
@@ -20,8 +19,6 @@ function parseWorkspaceFromCookie(cookieHeader: string | null): string | null {
   return null;
 }
 
-type WorkspaceCarrier = Pick<Headers, "get"> | Request;
-
 function getHeader(carrier: WorkspaceCarrier, key: string) {
   if (carrier instanceof Request) {
     return carrier.headers.get(key);
@@ -29,29 +26,82 @@ function getHeader(carrier: WorkspaceCarrier, key: string) {
   return carrier.get(key);
 }
 
+function forbidWorkspaceAccess(carrier: WorkspaceCarrier): never {
+  if (carrier instanceof Request) {
+    throw new Response("Workspace access forbidden", { status: 403 });
+  }
+  redirect("/auth/sign-in");
+}
+
+export type ResolveWorkspaceOptions = {
+  client?: SupabaseClient;
+};
+
 export async function resolveWorkspaceId(
   carrier: WorkspaceCarrier,
-  supabase: SupabaseClient
+  options?: ResolveWorkspaceOptions
 ): Promise<string> {
+  const supabase = options?.client ?? createRlsClient(carrier);
+
   const headerWorkspace = getHeader(carrier, "x-orionpulse-workspace");
+  const cookieWorkspace = parseWorkspaceFromCookie(getHeader(carrier, "cookie"));
+  const envWorkspace = process.env.ORIONPULSE_WORKSPACE_ID ?? null;
+
   if (headerWorkspace) {
-    return headerWorkspace;
+    const { data, error } = await supabase
+      .from("memberships")
+      .select("workspace_id")
+      .eq("workspace_id", headerWorkspace)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (data?.workspace_id) {
+      return data.workspace_id;
+    }
+
+    forbidWorkspaceAccess(carrier);
   }
 
-  const cookieHeader = getHeader(carrier, "cookie");
-  const cookieWorkspace = parseWorkspaceFromCookie(cookieHeader);
   if (cookieWorkspace) {
-    return cookieWorkspace;
+    const { data, error } = await supabase
+      .from("memberships")
+      .select("workspace_id")
+      .eq("workspace_id", cookieWorkspace)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (data?.workspace_id) {
+      return data.workspace_id;
+    }
+
+    forbidWorkspaceAccess(carrier);
   }
 
-  const envWorkspace = process.env.ORIONPULSE_WORKSPACE_ID;
   if (envWorkspace) {
-    return envWorkspace;
+    const { data, error } = await supabase
+      .from("memberships")
+      .select("workspace_id")
+      .eq("workspace_id", envWorkspace)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (data?.workspace_id) {
+      return data.workspace_id;
+    }
   }
 
   const { data, error } = await supabase
-    .from("workspaces")
-    .select("id")
+    .from("memberships")
+    .select("workspace_id")
     .order("created_at", { ascending: true })
     .limit(1)
     .maybeSingle();
@@ -60,50 +110,9 @@ export async function resolveWorkspaceId(
     throw error;
   }
 
-  if (data?.id) {
-    return data.id;
+  if (data?.workspace_id) {
+    return data.workspace_id;
   }
 
-  const defaultName = process.env.ORIONPULSE_DEFAULT_WORKSPACE_NAME ?? "OrionPulse HQ";
-  const defaultSlugBase = slugify(defaultName) || "workspace";
-  const territoriesFromEnv = (process.env.ORIONPULSE_DEFAULT_TERRITORIES ?? "MQ,GP,GF")
-    .split(",")
-    .map((territory) => territory.trim())
-    .filter(Boolean);
-  const territories = territoriesFromEnv.length > 0 ? territoriesFromEnv : ["MQ", "GP", "GF"];
-
-  try {
-    const { data: created, error: creationError } = await supabase
-      .from("workspaces")
-      .insert({
-        name: defaultName,
-        slug: `${defaultSlugBase}-${randomUUID().slice(0, 8)}`,
-        territory: territories
-      })
-      .select("id")
-      .single();
-
-    if (creationError) {
-      throw creationError;
-    }
-
-    if (!created?.id) {
-      throw new Error("Workspace bootstrap failed. No identifier returned by Supabase.");
-    }
-
-    return created.id;
-  } catch (creationError) {
-    const { data: retry } = await supabase
-      .from("workspaces")
-      .select("id")
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-
-    if (retry?.id) {
-      return retry.id;
-    }
-
-    throw creationError;
-  }
+  forbidWorkspaceAccess(carrier);
 }

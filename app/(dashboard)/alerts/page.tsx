@@ -4,7 +4,6 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { Pill } from "@/components/ui/pill";
 import { fetchAlertEvents } from "@/lib/data/alerts";
-import { createServiceRoleClient } from "@/lib/supabase/server";
 import { resolveWorkspaceId } from "@/lib/workspace";
 
 type AlertRow = Awaited<ReturnType<typeof fetchAlertEvents>>[number];
@@ -23,8 +22,7 @@ const columns: Column<AlertRow>[] = [
 ];
 
 async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
+  return resolveWorkspaceId(headers());
 }
 
 export default async function AlertsPage() {

@@ -1,14 +1,12 @@
 import { headers } from "next/headers";
+import { Download, FileText } from "lucide-react";
 
 import { SectionHeader } from "@/components/ui/section-header";
 import { fetchReports, fetchExports } from "@/lib/data/reports";
-import { createServiceRoleClient } from "@/lib/supabase/server";
 import { resolveWorkspaceId } from "@/lib/workspace";
-import { Download, FileText } from "lucide-react";
 
 async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
+  return resolveWorkspaceId(headers());
 }
 
 export default async function ReportsPage() {
@@ -66,7 +64,10 @@ export default async function ReportsPage() {
             </li>
           )}
           {exportsHistory.map((exportJob) => (
-            <li key={exportJob.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+            <li
+              key={exportJob.id}
+              className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+            >
               <span>
                 {exportJob.reportName} · {new Date(exportJob.createdAt).toLocaleString("fr-FR")}
               </span>

@@ -1,12 +1,11 @@
 import { headers } from "next/headers";
+import { AlertTriangle } from "lucide-react";
 
-import { SectionHeader } from "@/components/ui/section-header";
 import { Pill } from "@/components/ui/pill";
+import { SectionHeader } from "@/components/ui/section-header";
 import { fetchActiveAlerts } from "@/lib/data/overview";
 import { fetchTerritorySnapshots } from "@/lib/data/territories";
-import { createServiceRoleClient } from "@/lib/supabase/server";
 import { resolveWorkspaceId } from "@/lib/workspace";
-import { AlertTriangle } from "lucide-react";
 
 const healthTone: Record<string, string> = {
   OK: "border-emerald-400/30 bg-emerald-400/10 text-emerald-100",
@@ -23,8 +22,7 @@ function computeHealth(lastObservedAt?: string | null) {
 }
 
 async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
+  return resolveWorkspaceId(headers());
 }
 
 export default async function TerritoriesPage() {
@@ -89,7 +87,10 @@ export default async function TerritoriesPage() {
             </li>
           )}
           {alerts.map((alert) => (
-            <li key={alert.id} className="flex items-center justify-between rounded-xl border border-amber-300/20 bg-amber-300/5 px-4 py-3">
+            <li
+              key={alert.id}
+              className="flex items-center justify-between rounded-xl border border-amber-300/20 bg-amber-300/5 px-4 py-3"
+            >
               <span>{alert.title}</span>
               <span className="text-xs uppercase tracking-[0.3em] text-amber-100">{alert.status}</span>
             </li>

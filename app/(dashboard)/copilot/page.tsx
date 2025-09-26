@@ -2,12 +2,10 @@ import { headers } from "next/headers";
 
 import { CopilotWorkspace } from "@/components/copilot/workspace";
 import { fetchCopilotSuggestions } from "@/lib/data/copilot";
-import { createServiceRoleClient } from "@/lib/supabase/server";
 import { resolveWorkspaceId } from "@/lib/workspace";
 
 async function loadWorkspaceId() {
-  const supabase = createServiceRoleClient();
-  return resolveWorkspaceId(headers(), supabase);
+  return resolveWorkspaceId(headers());
 }
 
 export default async function CopilotPage() {
