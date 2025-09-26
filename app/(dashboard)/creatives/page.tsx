@@ -40,7 +40,14 @@ export default async function CreativesPage() {
               </div>
               <p className="text-sm text-slate-400">Plateforme : {creative.platform}</p>
               <p className="text-sm text-slate-300">
-                Fatigue : {creative.fatigueScore?.toFixed(1) ?? "—"} · Tags : {creative.tags.join(", ") || "—"}
+                Fatigue :
+                {creative.analysis.fatigueScore != null
+                  ? ` ${creative.analysis.fatigueScore.toFixed(1)}`
+                  : " —"}
+                {" "}· Tags :
+                {creative.analysis.tags.length > 0
+                  ? ` ${creative.analysis.tags.join(", ")}`
+                  : " —"}
               </p>
               <button className="inline-flex items-center justify-center rounded-full border border-white/10 px-4 py-2 text-xs text-slate-200 hover:border-accent-subtle">
                 Générer brief GPT-5

@@ -9,7 +9,16 @@ async function loadWorkspaceId() {
   return resolveWorkspaceId(headers(), supabase);
 }
 
-async function fetchProfile(workspaceId: string) {
+type MembershipProfile = {
+  role: string | null;
+  territories: string[];
+  user: {
+    fullName: string | null;
+    email: string | null;
+  };
+};
+
+async function fetchProfile(workspaceId: string): Promise<MembershipProfile | null> {
   const supabase = createServiceRoleClient();
   const { data: membership } = await supabase
     .from("memberships")
@@ -18,7 +27,29 @@ async function fetchProfile(workspaceId: string) {
     .limit(1)
     .single();
 
-  return membership;
+  if (!membership) {
+    return null;
+  }
+
+  const territories = Array.isArray(membership.territories)
+    ? membership.territories.map((territory) => String(territory))
+    : [];
+
+  const rawUser = Array.isArray(membership.users)
+    ? membership.users[0]
+    : membership.users;
+
+  const user = {
+    fullName:
+      rawUser && typeof rawUser.full_name === "string" ? rawUser.full_name : null,
+    email: rawUser && typeof rawUser.email === "string" ? rawUser.email : null
+  };
+
+  return {
+    role: membership.role ?? null,
+    territories,
+    user
+  };
 }
 
 export default async function ProfilePage() {
@@ -56,8 +87,8 @@ export default async function ProfilePage() {
       <div className="glass-panel divide-y divide-white/5">
         <div className="space-y-1 px-6 py-5">
           <p className="text-sm font-semibold text-slate-200">Utilisateur</p>
-          <p className="text-sm text-accent">{membership?.users?.full_name ?? "Utilisateur inconnu"}</p>
-          <p className="text-xs text-slate-500">{membership?.users?.email ?? "Email non défini"}</p>
+          <p className="text-sm text-accent">{membership?.user.fullName ?? "Utilisateur inconnu"}</p>
+          <p className="text-xs text-slate-500">{membership?.user.email ?? "Email non défini"}</p>
         </div>
         <div className="space-y-1 px-6 py-5">
           <p className="text-sm font-semibold text-slate-200">Rôle</p>
