@@ -1,0 +1,244 @@
+[
+  {
+    "slug": "google_ads",
+    "label": "Google Ads",
+    "docs": "https://github.com/google-marketing-solutions/google-ads-mcp-server",
+    "transports": ["STDIO", "HTTP SSE"],
+    "defaultServerUrl": "stdio:npx google-ads-mcp",
+    "defaultStatus": "unknown",
+    "env": {
+      "serverUrl": "MCP_GOOGLE_ADS_URL",
+      "status": "MCP_GOOGLE_ADS_STATUS"
+    },
+    "authVariables": [
+      { "name": "GOOGLE_ADS_DEVELOPER_TOKEN", "description": "Developer token issued from the Google Ads UI", "required": true },
+      { "name": "GOOGLE_ADS_CLIENT_ID", "description": "OAuth client id from Google Cloud Console", "required": true },
+      { "name": "GOOGLE_ADS_CLIENT_SECRET", "description": "OAuth client secret from Google Cloud Console", "required": true },
+      { "name": "GOOGLE_ADS_REFRESH_TOKEN", "description": "Refresh token created through the OAuth consent flow", "required": true },
+      { "name": "GOOGLE_ADS_LOGIN_CUSTOMER_ID", "description": "(Optionnel) ID manager pour accéder aux comptes enfants", "required": false },
+      { "name": "GOOGLE_ADS_YAML", "description": "Chemin vers google-ads.yaml si vous utilisez le transport STDIO", "required": false }
+    ],
+    "notes": [
+      "Activer l'API Google Ads sur le projet GCP et approuver le developer token.",
+      "Le serveur MCP expose GAQL via l'outil search_stream."
+    ]
+  },
+  {
+    "slug": "meta_ads",
+    "label": "Meta Ads",
+    "docs": "https://github.com/wiiip/meta-mcp",
+    "transports": ["STDIO", "HTTP SSE"],
+    "defaultServerUrl": "stdio:npx meta-mcp",
+    "defaultStatus": "unknown",
+    "env": {
+      "serverUrl": "MCP_META_ADS_URL",
+      "status": "MCP_META_ADS_STATUS"
+    },
+    "authVariables": [
+      { "name": "META_ACCESS_TOKEN", "description": "User ou system access token avec ads_read / ads_management", "required": true },
+      { "name": "META_APP_ID", "description": "App id si vous orchestrez le flow OAuth", "required": false },
+      { "name": "META_APP_SECRET", "description": "App secret pour rafraîchir le token", "required": false }
+    ],
+    "notes": [
+      "Vérifier l'accès avancé (Advanced Access) pour ads_management.",
+      "Suivre le scoring rate-limit fourni par l'API Marketing."
+    ]
+  },
+  {
+    "slug": "linkedin_ads",
+    "label": "LinkedIn Ads",
+    "docs": "https://github.com/radiateb2b/mcp-linkedinads",
+    "transports": ["HTTP SSE"],
+    "defaultServerUrl": "https://linkedinads.radiateb2b.com/sse",
+    "defaultStatus": "online",
+    "env": {
+      "serverUrl": "MCP_LINKEDIN_ADS_URL",
+      "status": "MCP_LINKEDIN_ADS_STATUS",
+      "authHeader": "MCP_LINKEDIN_ADS_TOKEN"
+    },
+    "authVariables": [
+      { "name": "MCP_LINKEDIN_ADS_TOKEN", "description": "Private access token fourni par RadiateB2B", "required": true }
+    ],
+    "notes": [
+      "Solution managée lecture seule, idéal pour démarrer sans self-host.",
+      "Déclarer le header Authorization: Bearer <token> dans la config agent."
+    ]
+  },
+  {
+    "slug": "tiktok_ads",
+    "label": "TikTok Ads",
+    "docs": "https://github.com/ysntony/tiktok-ads-mcp",
+    "transports": ["STDIO"],
+    "defaultServerUrl": "stdio:npx tiktok-ads-mcp",
+    "defaultStatus": "unknown",
+    "env": {
+      "serverUrl": "MCP_TIKTOK_ADS_URL",
+      "status": "MCP_TIKTOK_ADS_STATUS"
+    },
+    "authVariables": [
+      { "name": "TIKTOK_APP_ID", "description": "Identifiant d'app TikTok for Business", "required": true },
+      { "name": "TIKTOK_APP_SECRET", "description": "Secret d'app TikTok for Business", "required": true },
+      { "name": "TIKTOK_ACCESS_TOKEN", "description": "Access token annonceur obtenu via OAuth v2", "required": true }
+    ],
+    "notes": [
+      "Respecter les scopes requis par TikTok Business API.",
+      "Configurer les fenêtres de gel pour éviter les appels nocturnes."
+    ]
+  },
+  {
+    "slug": "amazon_ads",
+    "label": "Amazon Ads",
+    "docs": "https://github.com/MarketplaceAdPros/amazon-ads-mcp-server",
+    "transports": ["STDIO", "HTTP SSE"],
+    "defaultServerUrl": "https://app.marketplaceadpros.com/mcp",
+    "defaultStatus": "unknown",
+    "env": {
+      "serverUrl": "MCP_AMAZON_ADS_URL",
+      "status": "MCP_AMAZON_ADS_STATUS",
+      "authHeader": "MCP_AMAZON_ADS_TOKEN"
+    },
+    "authVariables": [
+      { "name": "MCP_AMAZON_ADS_TOKEN", "description": "Bearer token fourni par MarketplaceAdPros ou vos propres identifiants Advertising", "required": true }
+    ],
+    "notes": [
+      "Supporte STDIO self-host et instance managée HTTP SSE.",
+      "Prévoir la rotation du token toutes les 12 heures."
+    ]
+  },
+  {
+    "slug": "google_analytics",
+    "label": "Google Analytics 4",
+    "docs": "https://github.com/googleanalytics/google-analytics-mcp",
+    "transports": ["STDIO"],
+    "defaultServerUrl": "stdio:npx google-analytics-mcp",
+    "defaultStatus": "unknown",
+    "env": {
+      "serverUrl": "MCP_GOOGLE_ANALYTICS_URL",
+      "status": "MCP_GOOGLE_ANALYTICS_STATUS"
+    },
+    "authVariables": [
+      { "name": "GOOGLE_APPLICATION_CREDENTIALS", "description": "Chemin vers la clé JSON ADC avec scope analytics.readonly", "required": true },
+      { "name": "GOOGLE_PROJECT_ID", "description": "Projet GCP associé aux credentials", "required": true }
+    ],
+    "notes": [
+      "Activer Analytics Admin API et Data API avant utilisation.",
+      "Compatible avec impersonation de compte de service."
+    ]
+  },
+  {
+    "slug": "data_commons",
+    "label": "Data Commons",
+    "docs": "https://docs.datacommons.org/tools/mcp.html",
+    "transports": ["HTTP SSE"],
+    "defaultServerUrl": "https://mcp.datacommons.org/sse",
+    "defaultStatus": "online",
+    "env": {
+      "serverUrl": "MCP_DATA_COMMONS_URL",
+      "status": "MCP_DATA_COMMONS_STATUS"
+    },
+    "authVariables": [],
+    "notes": [
+      "Lecture publique (pas d'auth).",
+      "Idéal pour contextualiser les analyses MQ/GP/GF avec données socio-éco."
+    ]
+  },
+  {
+    "slug": "slack",
+    "label": "Slack",
+    "docs": "https://github.com/korotovsky/slack-mcp-server",
+    "transports": ["STDIO", "HTTP SSE"],
+    "defaultServerUrl": "stdio:npx slack-mcp-server",
+    "defaultStatus": "unknown",
+    "env": {
+      "serverUrl": "MCP_SLACK_URL",
+      "status": "MCP_SLACK_STATUS"
+    },
+    "authVariables": [
+      { "name": "SLACK_MCP_XOXP_TOKEN", "description": "Token utilisateur OAuth si mode stealth", "required": false },
+      { "name": "SLACK_MCP_XOXC_TOKEN", "description": "Token cookie xoxc pour mode navigateur (dev uniquement)", "required": false },
+      { "name": "SLACK_MCP_API_KEY", "description": "Clé API optionnelle pour sécuriser l'accès HTTP/SSE", "required": false }
+    ],
+    "notes": [
+      "Préférer un bot OAuth dédié en production.",
+      "Limiter les scopes (chat:write, channels:read) au strict nécessaire."
+    ]
+  },
+  {
+    "slug": "notion",
+    "label": "Notion",
+    "docs": "https://www.notion.so/product/notion-ai",
+    "transports": ["HTTP", "HTTP SSE"],
+    "defaultServerUrl": "https://mcp.notion.com/mcp",
+    "defaultStatus": "online",
+    "env": {
+      "serverUrl": "MCP_NOTION_URL",
+      "status": "MCP_NOTION_STATUS"
+    },
+    "authVariables": [],
+    "notes": [
+      "OAuth côté Notion (pas de secret stocké).",
+      "Limiter l'accès aux espaces clients pertinents."
+    ]
+  },
+  {
+    "slug": "atlassian",
+    "label": "Atlassian (Confluence/Jira)",
+    "docs": "https://community.atlassian.com/t5/Automation-discussions/Introducing-the-Atlassian-MCP/td-p/2672841",
+    "transports": ["HTTP SSE"],
+    "defaultServerUrl": "https://mcp.atlassian.com/sse",
+    "defaultStatus": "unknown",
+    "env": {
+      "serverUrl": "MCP_ATLASSIAN_URL",
+      "status": "MCP_ATLASSIAN_STATUS",
+      "authHeader": "MCP_ATLASSIAN_TOKEN"
+    },
+    "authVariables": [
+      { "name": "MCP_ATLASSIAN_TOKEN", "description": "Token OAuth 2.1 Atlassian Cloud ou API token self-host", "required": true }
+    ],
+    "notes": [
+      "Disponible en BETA officielle côté Atlassian.",
+      "Permet de créer issues, pages et commentaires via runbooks."
+    ]
+  },
+  {
+    "slug": "google_drive",
+    "label": "Google Drive / Sheets",
+    "docs": "https://github.com/googleworkspace/google-drive-mcp",
+    "transports": ["STDIO", "HTTP"],
+    "defaultServerUrl": "stdio:npx google-drive-mcp",
+    "defaultStatus": "unknown",
+    "env": {
+      "serverUrl": "MCP_GOOGLE_DRIVE_URL",
+      "status": "MCP_GOOGLE_DRIVE_STATUS"
+    },
+    "authVariables": [
+      { "name": "GOOGLE_DRIVE_CLIENT_ID", "description": "Client id OAuth", "required": true },
+      { "name": "GOOGLE_DRIVE_CLIENT_SECRET", "description": "Client secret OAuth", "required": true },
+      { "name": "GOOGLE_DRIVE_REFRESH_TOKEN", "description": "Refresh token utilisateur/service", "required": true }
+    ],
+    "notes": [
+      "Activer Google Drive API et Sheets API si nécessaire.",
+      "Utile pour partager exports et briefs créatifs."
+    ]
+  },
+  {
+    "slug": "dagster",
+    "label": "Dagster",
+    "docs": "https://github.com/kyryl-opens-ml/mcp-server-dagster",
+    "transports": ["STDIO", "HTTP"],
+    "defaultServerUrl": "stdio:npx mcp-server-dagster",
+    "defaultStatus": "unknown",
+    "env": {
+      "serverUrl": "MCP_DAGSTER_URL",
+      "status": "MCP_DAGSTER_STATUS"
+    },
+    "authVariables": [
+      { "name": "DAGSTER_GRAPHQL_URL", "description": "Endpoint GraphQL de votre instance Dagster", "required": true },
+      { "name": "DAGSTER_API_TOKEN", "description": "Token/API key pour Dagster Cloud ou instance self-host", "required": true }
+    ],
+    "notes": [
+      "Expose les jobs d'orchestration (sync, runbooks).",
+      "Permet aux agents GPT-5 de lancer des assets avec garde-fous."
+    ]
+  }
+]
