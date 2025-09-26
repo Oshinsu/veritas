@@ -45,13 +45,15 @@ export function TerritoryChart({ data }: { data: TerritoryDatum[] }) {
         borderColor: "rgba(148, 163, 184, 0.2)",
         textStyle: { color: "#e2e8f0", fontSize: 12 },
         valueFormatter: (value, series) => {
-          if (series?.seriesName === "ROAS" && typeof value === "number") {
+          const seriesName = (series as { seriesName?: string } | undefined)?.seriesName;
+
+          if (seriesName === "ROAS" && typeof value === "number") {
             return `${value.toFixed(2)}x`;
           }
           if (typeof value === "number") {
             return `€${value.toLocaleString("fr-FR")}`;
           }
-          return value as string;
+          return value == null ? "—" : String(value);
         }
       },
       xAxis: {

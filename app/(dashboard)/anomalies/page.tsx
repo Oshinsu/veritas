@@ -7,9 +7,9 @@ import { createServiceRoleClient } from "@/lib/supabase/server";
 import { resolveWorkspaceId } from "@/lib/workspace";
 
 const columns: Column<Anomaly>[] = [
-  { header: "Type", accessor: (row) => row.dimension?.type ?? "Anomalie" },
-  { header: "Canal", accessor: (row) => row.dimension?.channel ?? "—" },
-  { header: "Territoire", accessor: (row) => row.dimension?.territory ?? "—" },
+  { header: "Type", accessor: (row) => row.dimension.type ?? "Anomalie" },
+  { header: "Canal", accessor: (row) => row.dimension.channel ?? "—" },
+  { header: "Territoire", accessor: (row) => row.dimension.territory ?? "—" },
   {
     header: "Détectée",
     accessor: (row) => new Date(row.detectedAt).toLocaleString("fr-FR")

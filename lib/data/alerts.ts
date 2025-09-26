@@ -7,12 +7,17 @@ export type AlertRule = {
   threshold: Record<string, unknown>;
 };
 
+export type AlertEventPayload = {
+  ruleName?: string;
+  impact?: string;
+};
+
 export type AlertEvent = {
   id: string;
   ruleId: string;
   status: string;
   triggeredAt: string;
-  payload: Record<string, unknown>;
+  payload: AlertEventPayload;
 };
 
 export async function fetchAlertRules(workspaceId: string): Promise<AlertRule[]> {
@@ -48,12 +53,31 @@ export async function fetchAlertEvents(workspaceId: string): Promise<AlertEvent[
   }
 
   return (data ?? [])
-    .filter((row) => row.alert_rules?.workspace_id === workspaceId)
-    .map((row) => ({
-      id: row.id,
-      ruleId: row.rule_id,
-      status: row.status,
-      triggeredAt: row.triggered_at,
-      payload: row.payload ?? {}
-    }));
+    .filter((row) => {
+      const relatedRules = Array.isArray(row.alert_rules)
+        ? row.alert_rules
+        : [row.alert_rules];
+      return relatedRules.some((rule) => rule?.workspace_id === workspaceId);
+    })
+    .map((row) => {
+      const rawPayload = (row.payload ?? {}) as Record<string, unknown>;
+      const payload: AlertEventPayload = {
+        ruleName:
+          rawPayload["rule_name"] !== undefined
+            ? String(rawPayload["rule_name"])
+            : undefined,
+        impact:
+          rawPayload["impact"] !== undefined
+            ? String(rawPayload["impact"])
+            : undefined
+      };
+
+      return {
+        id: row.id,
+        ruleId: row.rule_id,
+        status: row.status,
+        triggeredAt: row.triggered_at,
+        payload
+      };
+    });
 }

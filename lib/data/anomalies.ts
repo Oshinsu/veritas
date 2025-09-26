@@ -1,11 +1,17 @@
 import { createServiceRoleClient } from "@/lib/supabase/server";
 
+export type AnomalyDimension = {
+  type?: string;
+  channel?: string;
+  territory?: string;
+};
+
 export type Anomaly = {
   id: string;
   detectedAt: string;
   severity: string;
   status: string;
-  dimension: Record<string, unknown>;
+  dimension: AnomalyDimension;
   runbookId?: string | null;
   description?: string | null;
 };
@@ -23,13 +29,31 @@ export async function fetchAnomalies(workspaceId: string): Promise<Anomaly[]> {
     throw error;
   }
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    detectedAt: row.detected_at,
-    severity: row.severity,
-    status: row.status,
-    dimension: row.dimension ?? {},
-    runbookId: row.runbook_id,
-    description: row.description
-  }));
+  return (data ?? []).map((row) => {
+    const rawDimension = (row.dimension ?? {}) as Record<string, unknown>;
+    const dimension: AnomalyDimension = {
+      type:
+        rawDimension["type"] !== undefined
+          ? String(rawDimension["type"])
+          : undefined,
+      channel:
+        rawDimension["channel"] !== undefined
+          ? String(rawDimension["channel"])
+          : undefined,
+      territory:
+        rawDimension["territory"] !== undefined
+          ? String(rawDimension["territory"])
+          : undefined
+    };
+
+    return {
+      id: row.id,
+      detectedAt: row.detected_at,
+      severity: row.severity,
+      status: row.status,
+      dimension,
+      runbookId: row.runbook_id,
+      description: row.description
+    };
+  });
 }

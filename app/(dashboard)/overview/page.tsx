@@ -50,9 +50,24 @@ export default async function OverviewPage() {
             Aucune donnée disponible pour le workspace. Lancez une synchronisation MCP pour alimenter les KPIs.
           </p>
         ) : (
-          kpiSummary.map((kpi) => (
-            <MetricCard key={kpi.label} label={kpi.label} value={kpi.value} delta={kpi.delta ?? undefined} />
-          ))
+          kpiSummary.map((kpi) => {
+            const formattedValue = kpi.value.toLocaleString("fr-FR", {
+              maximumFractionDigits: 2
+            });
+            const formattedDelta =
+              kpi.delta == null
+                ? "—"
+                : `${kpi.delta >= 0 ? "+" : ""}${kpi.delta.toFixed(1)}%`;
+
+            return (
+              <MetricCard
+                key={kpi.label}
+                label={kpi.label}
+                value={formattedValue}
+                delta={formattedDelta}
+              />
+            );
+          })
         )}
       </div>
 

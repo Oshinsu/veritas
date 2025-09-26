@@ -1,13 +1,17 @@
 import { createServiceRoleClient } from "@/lib/supabase/server";
 
+export type CreativeAnalysis = {
+  fatigueScore: number | null;
+  tags: string[];
+};
+
 export type CreativeAsset = {
   id: string;
   name: string;
   platform: string;
   status: string;
   thumbnailUrl?: string | null;
-  fatigueScore?: number | null;
-  tags: string[];
+  analysis: CreativeAnalysis;
   lastSeenAt?: string | null;
 };
 
@@ -24,14 +28,29 @@ export async function fetchCreativeAssets(workspaceId: string): Promise<Creative
     throw error;
   }
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    name: row.name,
-    platform: row.platform,
-    status: row.status,
-    thumbnailUrl: row.thumbnail_url,
-    fatigueScore: row.creative_analysis?.fatigue_score ?? null,
-    tags: row.creative_analysis?.tags ?? [],
-    lastSeenAt: row.last_seen_at
-  }));
+  return (data ?? []).map((row) => {
+    const rawAnalysis = Array.isArray(row.creative_analysis)
+      ? row.creative_analysis[0]
+      : row.creative_analysis;
+
+    const analysis: CreativeAnalysis = {
+      fatigueScore:
+        rawAnalysis && rawAnalysis.fatigue_score != null
+          ? Number(rawAnalysis.fatigue_score)
+          : null,
+      tags: Array.isArray(rawAnalysis?.tags)
+        ? rawAnalysis!.tags.map((tag: unknown) => String(tag))
+        : []
+    };
+
+    return {
+      id: row.id,
+      name: row.name,
+      platform: row.platform,
+      status: row.status,
+      thumbnailUrl: row.thumbnail_url,
+      analysis,
+      lastSeenAt: row.last_seen_at
+    };
+  });
 }

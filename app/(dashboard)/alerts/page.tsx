@@ -10,10 +10,10 @@ import { resolveWorkspaceId } from "@/lib/workspace";
 type AlertRow = Awaited<ReturnType<typeof fetchAlertEvents>>[number];
 
 const columns: Column<AlertRow>[] = [
-  { header: "Règle", accessor: (row) => row.payload?.rule_name ?? row.ruleId },
+  { header: "Règle", accessor: (row) => row.payload.ruleName ?? row.ruleId },
   {
     header: "Impact",
-    accessor: (row) => row.payload?.impact ?? "—"
+    accessor: (row) => row.payload.impact ?? "—"
   },
   { header: "Statut", accessor: (row) => <Pill>{row.status}</Pill> },
   {
