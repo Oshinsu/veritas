@@ -1,6 +1,11 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
+import {
+  resolveServiceRoleKeyFromEnv,
+  resolveServiceRoleUrlFromEnv
+} from "@/lib/supabase/server-env";
+
 const eventSchema = z.object({
   role: z.enum(["user", "assistant", "system", "tool"]),
   content: z.string(),
@@ -21,11 +26,8 @@ export type CopilotSession = {
  * En production l'URL et la clé seront injectées via environnement sécurisé (Edge Config / Vault).
  */
 export function createCopilotStore(): SupabaseClient | null {
-  const url =
-    process.env.SUPABASE_URL ??
-    process.env.NEXT_PUBLIC_SUPABASE_URL ??
-    (process.env.SUPABASE_PROJECT_ID ? `https://${process.env.SUPABASE_PROJECT_ID}.supabase.co` : undefined);
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = resolveServiceRoleUrlFromEnv();
+  const serviceKey = resolveServiceRoleKeyFromEnv();
   if (!url || !serviceKey) {
     return null;
   }

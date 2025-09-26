@@ -1,0 +1,4 @@
+export const SUPABASE_DEFAULT_PROJECT_ID = "jqhmxrzzqzlwongbrdio";
+export const SUPABASE_DEFAULT_URL = `https://${SUPABASE_DEFAULT_PROJECT_ID}.supabase.co`;
+export const SUPABASE_DEFAULT_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxaG14cnp6cXpsd29uZ2JyZGlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4NDIzNjgsImV4cCI6MjA3NDQxODM2OH0.NgDEys4bS3ThOe8QpnCCiRhqWXYF2objARjtWHlS8Pg";
